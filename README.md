@@ -4,11 +4,15 @@ Reading a reflected ARIA element property, such as `ariaLabelledByElements`, on 
 
 ## Reproduce with Playwright
 
-Needs Node 22 or later and Docker. It runs in the official `mcr.microsoft.com/playwright:v1.65.0-noble` image.
+    npm ci
+    npx playwright install firefox
+    npm test
+
+Expected: 2 failed with `Page crashed`, in either read order, and 3 passed. The 3 passing tests are controls.
+
+The same run in the official `mcr.microsoft.com/playwright:v1.65.0-noble` Docker image, which also checks the counts:
 
     ./reproduce.sh
-
-Expected: `passed 3, failed 2`. The two failures are `Page crashed`, in either read order. The three controls pass.
 
 To see the proposed Playwright change work:
 

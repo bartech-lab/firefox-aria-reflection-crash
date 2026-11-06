@@ -1,1 +1,10 @@
-{ "name": "firefox-159-crash", "private": true, "devDependencies": { "@playwright/test": "1.65.0" } }
+{
+  "name": "firefox-159-crash",
+  "private": true,
+  "scripts": {
+    "test": "playwright test --project=firefox"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.0"
+  }
+}
