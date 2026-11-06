@@ -1,6 +1,6 @@
 // Runs stock Firefox with a content script and a page script reading ariaLabelledByElements.
 //   node run.mjs <firefox binary> <geckodriver binary>
-// Prints one result per page. Exits 0 when only the page that uses both worlds crashes.
+// Prints one result per page. Exits 0 when only the page that uses both worlds crashes, 1 when nothing crashes, 2 otherwise.
 import { spawn } from 'node:child_process';
 import http from 'node:http';
 import { fileURLToPath } from 'node:url';
@@ -27,8 +27,8 @@ const wd = async (method, path, body) => {
   return (await res.json()).value;
 };
 
-let good = true;
-for (const [path, { crashes }] of Object.entries(pages)) {
+let good = true, crashCount = 0;
+for (const [path, { crashes: expected }] of Object.entries(pages)) {
   for (let run = 1; run <= 3; run++) {
     const session = await wd('POST', '/session', { capabilities: { alwaysMatch: { 'moz:firefoxOptions': { args: ['-headless'] } } } });
     const { sessionId } = session;
@@ -44,11 +44,14 @@ for (const [path, { crashes }] of Object.entries(pages)) {
     const alive = await wd('POST', `/session/${sessionId}/execute/sync`, { script: 'return navigator.userAgent', args: [] }).catch(() => null);
     const crashed = typeof alive !== 'string';
     console.log(`${path} run ${run}: ${crashed ? 'CRASHED' : 'alive'}${crashed ? '' : ` (${alive.match(/Firefox.*/)[0]})`}`);
-    if (crashed !== crashes) good = false;
+    if (crashed) crashCount++;
+    if (crashed !== expected) good = false;
     await wd('DELETE', `/session/${sessionId}`).catch(() => {});
   }
 }
 driver.kill();
 server.close();
-console.log(good ? 'RESULT: crash reproduced on /both-worlds only' : 'RESULT: not the expected pattern');
-process.exit(good ? 0 : 1);
+if (good) console.log('RESULT: crash reproduced on /both-worlds only');
+else if (!crashCount) console.log('RESULT: no crash, this Firefox has the fix');
+else console.log('RESULT: not the expected pattern');
+process.exit(good ? 0 : crashCount ? 2 : 1);
