@@ -1,5 +1,7 @@
 # Firefox tab crash on `getByRole`, since Playwright 1.65.0
 
+**Status:** fixed in Firefox 163 ([bug 2090055](https://bugzilla.mozilla.org/show_bug.cgi?id=2090055), merged 2026-11-20). Playwright also added the fix to its own Firefox build in [#43982](https://github.com/microsoft/playwright/pull/43982), expected to ship in Playwright 1.66.
+
 Reading a reflected ARIA element property, such as `ariaLabelledByElements`, on one element from two JS worlds crashes Firefox. Playwright 1.65.0 reads that property in its utility world, so `getByRole` with a `name` can crash the page.
 
 ## Reproduce with Playwright
